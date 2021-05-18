@@ -1,0 +1,11 @@
+name: 10X-analysis
+
+channels:
+    - conda-forge
+    - defaults
+    - bioconda
+
+dependencies:
+    - r=4.0.5
+    - r-devtools
+    - r-seurat=4.0.1

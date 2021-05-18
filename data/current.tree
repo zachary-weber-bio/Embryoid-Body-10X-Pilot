@@ -1,0 +1,19 @@
+.
+├── current.tree
+└── raw
+    ├── 210515_AH55F2DRXY_MN-DS-10X-2S-NDS_sha256sum.txt
+    ├── H55F2DRXY_2
+    │   ├── MN-DS-10X-2S-Del_S2_L002_I1_001.fastq.gz
+    │   ├── MN-DS-10X-2S-Del_S2_L002_I2_001.fastq.gz
+    │   ├── MN-DS-10X-2S-Del_S2_L002_R1_001.fastq.gz
+    │   ├── MN-DS-10X-2S-Del_S2_L002_R2_001.fastq.gz
+    │   ├── MN-DS-10X-2S-WT_S1_L002_I1_001.fastq.gz
+    │   ├── MN-DS-10X-2S-WT_S1_L002_I2_001.fastq.gz
+    │   ├── MN-DS-10X-2S-WT_S1_L002_R1_001.fastq.gz
+    │   └── MN-DS-10X-2S-WT_S1_L002_R2_001.fastq.gz
+    ├── Undetermined_S0_L002_I1_001.fastq.gz
+    ├── Undetermined_S0_L002_I2_001.fastq.gz
+    ├── Undetermined_S0_L002_R1_001.fastq.gz
+    └── Undetermined_S0_L002_R2_001.fastq.gz
+
+2 directories, 14 files

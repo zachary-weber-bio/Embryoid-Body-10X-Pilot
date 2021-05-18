@@ -1,0 +1,154 @@
+# File Name: Snakefile-10X-EB
+# Created By: ZW
+# Created On: 2021-05-17
+# description- runs scRNAseq pipeline for 10x Genomics-derived data in EBs
+
+
+# read in analysis configuration details
+configfile: "configs/config.yaml"
+workdir: config["directories"]["working"]
+
+temp_dir = config["directories"]["temp"]
+fastq_dir = config["directories"]["fastq"]
+data_dir = config["directories"]["data"]
+results_dir = config["directories"]["results"]
+
+conda_envs = config["conda"]
+experiment = config["experiment"]
+samples = experiment["samples"]
+lanes = experiment["lanes"]
+
+rule all:
+    input:
+	expand(data_dir + "{sample}/outs/web_summary.html", sample=samples)
+	expand(data_dir + "{sample}/outs/metrics_summary.csv", sample=samples)
+	expand(data_dir + "{sample}/outs/possorted_genome_bam.bam", sample=samples)
+	expand(data_dir + "{sample}/outs/possorted_genome_bam.bam.bai", sample=samples)
+	expand(data_dir + "{sample}/outs/filtered_feature_bc_matrix", sample=samples)
+	expand(data_dir + "{sample}/outs/filtered_feature_bc_matrix_h5.h5", sample=samples)
+	expand(data_dir + "{sample}/outs/raw_feature_bc_matrices", sample=samples)
+	expand(data_dir + "{sample}/outs/raw_feature_bc_matrices_h5.h5", sample=samples)
+	expand(data_dir + "{sample}/outs/analysis", sample=samples)
+	expand(data_dir + "{sample}/outs/molecule_info.h5", sample=samples)
+	expand(data_dir + "{sample}/outs/cloupe.cloupe", sample=samples)
+	#expand(data_dir + "{sample}/outs/feature_reference.csv", sample=samples)
+
+
+
+
+
+# TODO
+#
+# - figure out whether feature_reference.csv is generated during our runs
+# - write python code to detect memory and number of cores for cellranger
+#
+#
+
+###############################3
+######
+### OLD STUFF FOR REFERENCE
+#
+
+
+
+
+
+
+
+
+
+
+
+
+
+#-------------------
+#---------
+#--
+#-
+#
+
+# define pipeline output files
+rule all:
+    input:
+        expand(datadir + "{sample}.alt_bwamem_GRCh38DH.20150718.YRI.low_coverage.cram.crai",sample=samples),
+        expand(resultsdir + "{sample}_diploidSV.vcf.gz",sample=samples),
+        expand(resultsdir + "{sample}_diploidSV.vcf.gz.tbi",sample=samples),
+        expand(resultsdir + "{sample}_diploidSV.passing.vcf.gz",sample=samples),
+        expand(resultsdir + "{sample}_diploidSV.passing.vcf.gz.tbi",sample=samples),
+	resultsdir + "TAD_boundary_intersects.sorted.bed",
+	expand(resultsdir + "evidence/{sample}.SVevidence.bam",sample=samples)
+
+i# 1.) index our alignment files with samtools
+riule samtools_index:
+    input: cram = datadir + "{sample}.alt_bwamem_GRCh38DH.20150718.YRI.low_coverage.cram",
+    params: threads = str(config["rule_params"]["samtools"]["threads"])
+    output: datadir + "{sample}.alt_bwamem_GRCh38DH.20150718.YRI.low_coverage.cram.crai"
+    conda: anaconda_env["samtools"]
+    shell:
+        "samtools index -@ {params.threads} {input.cram}"
+
+# 2.) run Manta SV calling on each sample to produce a
+# VCF of structural variants found in WGS + filter for passing
+rule manta_sv_calling:
+    input:
+        ref_genome = config["reference_fasta"],
+	call_regions = config["call_regions"],
+        cram = datadir + "{sample}.alt_bwamem_GRCh38DH.20150718.YRI.low_coverage.cram",
+        crai = datadir + "{sample}.alt_bwamem_GRCh38DH.20150718.YRI.low_coverage.cram.crai",
+    params:
+        sample = "{sample}",
+	tmpdir = tmpdir,
+	outdir = resultsdir,
+	jobs = str(config["rule_params"]["manta"]["jobs"]),
+        memGB = str(config["rule_params"]["manta"]["memGB"])
+    output:
+        resultsdir + "{sample}_diploidSV.vcf.gz",
+        resultsdir + "{sample}_diploidSV.vcf.gz.tbi",
+	resultsdir + "{sample}_diploidSV.passing.vcf.gz",
+	resultsdir + "{sample}_diploidSV.passing.vcf.gz.tbi"
+    conda:
+        anaconda_env["manta"]
+    shell:
+        "./scripts/runManta.sh -b {input.cram} -i {input.crai}"
+        " -s {params.sample} -r {input.ref_genome} -c {input.call_regions}"
+        " -s {params.sample} -t {params.tmpdir} -o {params.outdir}"
+        " -j {params.jobs} -g {params.memGB}"
+
+# 3.) find and enumerate structural variants which are thought to intersect TAD
+# iboundary regions in one or more samples
+rule tad_boundary_intersect:
+    input:
+        tad_boundaries = config["tad_boundaries"],
+        sv_calls_vcfs = expand(resultsdir + "{sample}_diploidSV.passing.vcf.gz",sample=samples)
+    output: resultsdir + "TAD_boundary_intersects.sorted.bed"
+    conda: anaconda_env["samtools"]
+    shell:
+        "bedtools intersect -wo -a {input.tad_boundaries} -b {input.sv_calls_vcfs} -filenames"
+        " | sort -k1,1V -k2,2n > {output}"
+
+# 4.) generate "evidence bam" containing reads in the areas where called
+# structural variants have been found.
+rulie generate_evidence_bam:
+    input:
+        vcf = resultsdir + "{sample}_diploidSV.passing.vcf.gz",
+        cram = datadir + "{sample}.alt_bwamem_GRCh38DH.20150718.YRI.low_coverage.cram",
+        genome_file = config["genome_file"],
+        ref_genome = config["reference_fasta"]
+    params:
+        sample = "{sample}",
+        margin = str(config["rule_params"]["bedtools"]["evidence_roi_margin"])
+    output: resultsdir + "evidence/{sample}.SVevidence.bam"
+    conda: anaconda_env["samtools"]
+    shell:
+        "./scripts/generate_evidence_BAM.sh -s {params.sample}"
+        " -v {input.vcf} -b {input.cram} -m {params.margin}"
+        " -g {input.genome_file} -r {input.ref_genome} -o {output}"
+
+
+
+
+
+
+
+
+	
