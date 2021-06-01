@@ -1,0 +1,19 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cores: 2
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	build_aggregation_csv
+	1
+Select jobs to execute...
+
+[Wed May 26 14:39:54 2021]
+rule build_aggregation_csv:
+    input: /project2/nobrega/zach/Embryoid-Body-10X-Pilot/data/MN-DS-10X-2S-Del_web_summary.html, /project2/nobrega/zach/Embryoid-Body-10X-Pilot/data/MN-DS-10X-2S-WT_web_summary.html
+    output: /project2/nobrega/zach/Embryoid-Body-10X-Pilot/data/aggregation-files.csv
+    jobid: 0
+
+[Wed May 26 14:39:54 2021]
+Finished job 0.
+1 of 1 steps (100%) done

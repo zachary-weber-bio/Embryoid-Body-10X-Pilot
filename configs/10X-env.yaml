@@ -6,6 +6,6 @@ channels:
     - bioconda
 
 dependencies:
-    - r=4.0.5
+    - r-base=4.0.5
     - r-devtools
     - r-seurat=4.0.1

@@ -1,0 +1,31 @@
+# File Name: config.yaml
+# Created By: ZW
+# Created On: 2021-05-06
+# Purpose: configuration file for 10X pipeline for EB characterization
+
+# directory, resource, and file definitions
+directories :
+    working : "/project2/nobrega/zach/Embryoid-Body-10X-Pilot/"
+    temp : "/home/zweber/sratch-midway2/"
+    fastq : "/project2/nobrega/zach/Embryoid-Body-10X-Pilot/data/raw/H55F2DRXY_2/"
+    data : "/project2/nobrega/zach/Embryoid-Body-10X-Pilot/data/"
+    results : "/project2/nobrega/zach/Embryoid-Body-10X-Pilot/results/"
+
+resources :
+    reference : "/project2/nobrega/zach/reference/10X/refdata-gex-GRCh38-2020-A/"
+
+# experiment information
+experiment :
+    samples :
+        MN-DS-10X-2S-Del :
+            lane : "2"
+            alias : "DEL36"
+        MN-DS-10X-2S-WT :
+            lane : "2"
+            alias : "WT"
+
+# conda environment files for rules
+conda :
+    cellranger : "configs/10X-env.yaml"
+    seurat : "configs/10X-env.yaml"
+

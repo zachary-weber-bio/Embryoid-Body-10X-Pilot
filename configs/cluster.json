@@ -1,0 +1,28 @@
+{
+    "__default__" : {
+        "memory_per_cpu" : 2000,
+        "cores_per_node" : 12,
+        "n" : 1,
+        "time" : "02:00:00",
+        "name" : "snake-{rule}",
+        "logfile" : "log/snake-{rule}.log"
+    },
+    "cellranger_count" : {
+        "time" : "08:00:00",
+        "memory_per_cpu" : 2000,
+        "cores_per_node" : 28,
+        "n" : 4,
+        "logfile" : "log/snake-{rule}-{wildcards.sample}.log"
+    },
+    "build_aggregation_csv": {
+      "memory_per_cpu" : 2000,
+      "cores_per_node" : 2,
+      "time" : "00:30:00",
+    },
+    "cellranger_aggr" : {
+        "memory_per_cpu" : 2000,
+        "cores_per_node" : 12,
+        "time" : "01:00:00"
+    }
+}
+
